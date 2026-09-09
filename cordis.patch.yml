@@ -1,0 +1,8 @@
+# dsh-archived-sessions bundle patch: one host row over the profile.
+#
+# 该行挂载宿主半部（lib/index.js），它经 ctx.provide 提供 archivedSessions 服务，
+# 并由 lib/typert.host.js 的手写清单把它暴露成 Remote，供浏览器半部调用。
+# 浏览器半部由 package.json 的 dsh.client 声明发现（exports["./client"]）。
+- insert:
+    - id: archived-sessions
+      name: dsh-archived-sessions
