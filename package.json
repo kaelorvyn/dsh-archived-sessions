@@ -42,11 +42,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xiongyishun666-alt/dsh-archived-sessions.git"
+    "url": "git+https://github.com/kaelorvyn/dsh-archived-sessions.git"
   },
-  "homepage": "https://github.com/xiongyishun666-alt/dsh-archived-sessions#readme",
+  "homepage": "https://github.com/kaelorvyn/dsh-archived-sessions#readme",
   "bugs": {
-    "url": "https://github.com/xiongyishun666-alt/dsh-archived-sessions/issues"
+    "url": "https://github.com/kaelorvyn/dsh-archived-sessions/issues"
   },
   "engines": {
     "node": ">=20"
