@@ -1,7 +1,7 @@
 {
   "name": "dsh-archived-sessions",
-  "version": "1.0.0",
-  "description": "设置面板新增「已归档会话」页：列出全部已归档会话并一键恢复（取消归档）。Settings page listing archived sessions with one-click restore.",
+  "version": "1.2.0",
+  "description": "设置面板新增「已归档会话」页：查看所有已归档会话，可单条或批量恢复（取消归档）/ 永久删除（从磁盘删掉会话文件，释放空间）。",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -19,9 +19,6 @@
     },
     "client": {
       "platform": "web"
-    },
-    "compatibility": {
-      "dsh": ">=0.1.2-rc.1"
     }
   },
   "files": [
@@ -31,25 +28,6 @@
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
     "react": "^18.2.0"
-  },
-  "keywords": [
-    "dsh",
-    "dsh-plugin",
-    "deepseek-harness",
-    "archive",
-    "session",
-    "settings"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kaelorvyn/dsh-archived-sessions.git"
-  },
-  "homepage": "https://github.com/kaelorvyn/dsh-archived-sessions#readme",
-  "bugs": {
-    "url": "https://github.com/kaelorvyn/dsh-archived-sessions/issues"
-  },
-  "engines": {
-    "node": ">=20"
   },
   "license": "MIT"
 }
