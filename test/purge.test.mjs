@@ -106,21 +106,23 @@ console.log('=== ①b 嵌套备份里的副本也要删掉（DSH 的 _dup-backup
   check('体积合计两处（90.0 KB）', /释放 90\.0 KB/.test(r.text), r.text)
 }
 
-console.log('=== ② 【回归】删除后必须仍然归档 —— 否则会话会全部回到侧边栏 ===')
+console.log('=== ② 【回归】彻底删干净之后才移出归档 —— 行才会从归档页消失 ===')
 {
+  // 归档页的列表只读 archivedSessionIds，所以「行消失」= 从集合里移除。
+  // 但移出归档同时等于「取消隐藏」，只有磁盘上真的一个副本都不剩时才能做。
   const h = makeCtx(['session-b', 'session-keep'])
   mod.apply(h.ctx)
   await h.registered['purge'].handler({ rawInput: 'session-b' })
-  check('session-b 仍留在归档集合里', h.archived().includes('session-b'), JSON.stringify(h.archived()))
+  check('session-b 已移出归档（行会消失）', !h.archived().includes('session-b'), JSON.stringify(h.archived()))
   check('文件确实已被删除', !existsSync(dB))
   check('其他归档条目未受影响', h.archived().includes('session-keep'))
 
-  // 这正是当初出事的写法：移出归档 = 取消隐藏
+  // 反例：不在归档列表里的会话根本不该被删（防误删正在用的）
   const h2 = makeCtx(['session-keep'])
   mod.apply(h2.ctx)
-  const before = h2.archived().length
-  await h2.registered['purge'].handler({ rawInput: 'session-keep' })
-  check('删除不在归档里的会话被拒绝（集合长度不变）', h2.archived().length === before, JSON.stringify(h2.archived()))
+  const r2 = await h2.registered['purge'].handler({ rawInput: 'session-nowhere' })
+  check('不在归档里的会话被拒绝', r2.kind === 'error', JSON.stringify(r2))
+  check('归档集合未被改动', h2.archived().length === 1 && h2.archived()[0] === 'session-keep', JSON.stringify(h2.archived()))
 }
 
 console.log('=== ③ Codex 导入的会话：源文件必须一起删 ===')
@@ -135,7 +137,7 @@ console.log('=== ③ Codex 导入的会话：源文件必须一起删 ===')
   check('Codex 源文件（archived_sessions）已删', !existsSync(srcArchived))
   check('提示了源文件也一并删掉', /源文件也一并删掉/.test(r.text), r.text)
   check('体积含源文件（580.0 KB）', /释放 580\.0 KB/.test(r.text), r.text)
-  check('仍保持归档', h.archived().includes(codexId))
+  check('已移出归档（文件已彻底删净）', !h.archived().includes(codexId), JSON.stringify(h.archived()))
 }
 
 console.log('=== ④ 批量删除：一条命令删多个，体积汇总 ===')
@@ -148,7 +150,7 @@ console.log('=== ④ 批量删除：一条命令删多个，体积汇总 ===')
   check('返回 success', r.kind === 'success', JSON.stringify(r))
   check('报告删了 2 个', /已永久删除 2 个会话/.test(r.text), r.text)
   check('体积合计（75.0 KB）', /释放 75\.0 KB/.test(r.text), r.text)
-  check('两者仍保持归档', h.archived().includes('session-b') && h.archived().includes('session-c'), JSON.stringify(h.archived()))
+  check('两者都已移出归档', !h.archived().includes('session-b') && !h.archived().includes('session-c'), JSON.stringify(h.archived()))
 }
 
 console.log('=== ⑤ 原子性：批次里有一个非法 id 就一个都不删 ===')
@@ -179,8 +181,9 @@ console.log('=== ⑦ 磁盘上没有文件的条目，保持归档而不是被�
   const h = makeCtx(['session-ghost', 'session-keep'])
   mod.apply(h.ctx)
   const r = await h.registered['purge'].handler({ rawInput: 'session-ghost' })
-  check('返回 success 并说明情况', r.kind === 'success' && /保持归档/.test(r.text), JSON.stringify(r))
-  check('幽灵条目仍在归档（没有被放回列表）', h.archived().includes('session-ghost'), JSON.stringify(h.archived()))
+  check('返回 success', r.kind === 'success', JSON.stringify(r))
+  check('文件本就不在，视为已删净 → 移出归档', !h.archived().includes('session-ghost'), JSON.stringify(h.archived()))
+  check('其他归档条目未受影响', h.archived().includes('session-keep'))
 }
 
 console.log('=== ⑧ /archive：把会话加进归档集合 ===')
