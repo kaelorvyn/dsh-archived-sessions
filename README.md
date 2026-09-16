@@ -53,6 +53,7 @@ Restart DSH after installing, then open **Settings → Archived sessions**.
 命令方式 / Command form（等效，可一次给多个 id）:
 
 ```
+/archive   <session-id> [more-ids…]
 /unarchive <session-id> [more-ids…]
 /purge     <session-id> [more-ids…]
 ```
@@ -68,8 +69,22 @@ A session lives at `~/.dsh/sessions/<group>/<session-id>/` (containing `session.
   Removes the whole directory and reports the freed size.
 - 同一个 id 可能在**多个分组目录下各有一份**（会话移动过分组时会发生），所以会把**所有**同名目录都删掉，不留残留。
   The same id can exist under **several group directories** (which happens when a session was moved between groups), so **every** matching directory is removed — no leftovers.
-- 磁盘上已经没有的条目按「幽灵条目」处理：只把它移出归档列表，不报错。
-  Entries with no files on disk are treated as ghosts: they are just removed from the archive list, without an error.
+- **从 Codex 导入的会话，源文件也一并删掉。** DSH 里那些 `session-codex-<uuid>` 是从
+  `~/.codex/` 导入的（`sessions/<年>/<月>/<日>/rollout-<时间>-<uuid>.jsonl`，或
+  `archived_sessions/` 下平铺）。只删 DSH 的副本，下一次导入会把会话原样带回来 ——
+  用户看到的就是「永久删除了怎么又全回来了」。而且源文件那边通常大得多
+  （实测 605MB vs 191MB），不删也谈不上省空间。
+  **Sessions imported from Codex have their source file deleted too.** Those
+  `session-codex-<uuid>` entries are imported from `~/.codex/`; deleting only DSH's copy
+  means the next import brings the session straight back. The source is usually much
+  larger anyway (measured: 605 MB vs 191 MB).
+- **删除不改变可见性。** 删完会话**仍然留在归档集合里**（否则就等于取消隐藏，
+  它们会当场全部回到侧边栏）。想让它重新可见，用「恢复」。
+  **Deleting does not change visibility.** A deleted session **stays archived**;
+  otherwise the deletion would effectively un-hide it and every one of them would
+  reappear in the sidebar at once. Use **Restore** to make it visible again.
+- 磁盘上已经没有文件的条目按「幽灵条目」处理：保持归档，不报错。
+  Entries with no files on disk are treated as ghosts: they stay archived, without an error.
 - DSH 没有会话索引数据库（列表是扫磁盘得来的），所以删掉目录就是彻底消失。
   DSH keeps no session index database (the list is built by scanning the disk), so deleting the directory is enough.
 

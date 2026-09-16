@@ -1,6 +1,6 @@
 {
   "name": "dsh-archived-sessions",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "设置面板新增「已归档会话」页：查看所有已归档会话，可单条或批量恢复（取消归档）/ 永久删除（从磁盘删掉会话文件，释放空间）。",
   "type": "module",
   "main": "lib/index.js",
