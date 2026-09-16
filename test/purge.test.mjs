@@ -90,6 +90,22 @@ console.log('=== ① 单条删除：同一 id 的多份副本都要删掉 ===')
   check('其他会话未受影响', existsSync(dKeep))
 }
 
+console.log('=== ①b 嵌套备份里的副本也要删掉（DSH 的 _dup-backup-…）===')
+{
+  const main = makeSession('groupA', 'session-dup2', 60 * 1024)
+  // DSH 的重复会话备份长成 _dup-backup-<时间戳>/<分组>/<id>，比正常结构深一层
+  const nested = join(tmp, 'sessions', '_dup-backup-20260916-191828', '--groupA--', 'session-dup2')
+  mkdirSync(nested, { recursive: true })
+  writeFileSync(join(nested, 'session.v3.jsonl.zstd'), Buffer.alloc(30 * 1024, 5))
+  const h = makeCtx(['session-dup2'])
+  mod.apply(h.ctx)
+  const r = await h.registered['purge'].handler({ rawInput: 'session-dup2' })
+  check('返回 success', r.kind === 'success', JSON.stringify(r))
+  check('正常位置已删', !existsSync(main))
+  check('嵌套备份里的副本也已删', !existsSync(nested), nested)
+  check('体积合计两处（90.0 KB）', /释放 90\.0 KB/.test(r.text), r.text)
+}
+
 console.log('=== ② 【回归】删除后必须仍然归档 —— 否则会话会全部回到侧边栏 ===')
 {
   const h = makeCtx(['session-b', 'session-keep'])
